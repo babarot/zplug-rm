@@ -1,0 +1,36 @@
+#autoload
+
+if ! (( $+commands[fzy] )); then
+    echo "fzy: not found" >&2
+    return 1
+fi
+
+local repo dir
+
+for repo in ${(uk)zplugs[@]:gs:@:}
+do
+    echo "$repo"
+done | fzy | read repo
+
+if [[ -z $repo ]]; then
+    return 0
+fi
+
+if [[ -d ${~repo} ]]; then
+    dir=${~repo}
+elif [[ -d $ZPLUG_REPOS/$repo ]]; then
+    dir=$ZPLUG_REPOS/$repo
+else
+    echo "$repo: not found" >&2
+    return 1
+fi
+
+printf "Remove $repo? "
+if read -q; then
+    echo
+    setopt xtrace
+    rm -rf "$dir"
+    return $status
+else
+    printf "\nCanceled\n"
+fi
